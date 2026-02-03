@@ -36,7 +36,7 @@ export default function AnalyticsScreen() {
                         Ngân sách tháng
                     </Text>
                     <Text color="$primary" fontSize={24} fontWeight="700" marginBottom={8}>
-                        Còn lại 31.250.000 ₫
+                        Còn lại 31,250,000 ₫
                     </Text>
                     <YStack 
                         height={8} 

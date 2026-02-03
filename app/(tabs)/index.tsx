@@ -153,16 +153,16 @@ export default function HomeScreen() {
                                         </Text>
                                     </YStack>
                                     
-                                    <XStack 
-                                        backgroundColor="rgba(0,0,0,0.2)" 
-                                        borderRadius={30} 
-                                        paddingHorizontal={12} 
-                                        paddingVertical={8} 
+                                    <XStack
+                                        backgroundColor="rgba(0,0,0,0.2)"
+                                        borderRadius={30}
+                                        paddingHorizontal={12}
+                                        paddingVertical={8}
                                         gap={6}
                                         alignItems="center"
                                         alignSelf="flex-start"
                                         pressStyle={{ opacity: 0.7 }}
-                                        // onPress={() => router.push('/qr-scan')} // Placeholder
+                                        onPress={() => router.push('/qr-receive')}
                                     >
                                         <Ionicons name="qr-code-outline" size={20} color="white" />
                                         <Text color="white" fontSize={14} fontWeight="600">QR</Text>

@@ -6,6 +6,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 
+import { formatAmount, formatVietnameseDate } from '@/utils/formatting';
+
 const categories = [
     { id: 'gift', name: 'Quà tặng', icon: 'gift', color: '#EC4899' },
     { id: 'freelance', name: 'Freelance', icon: 'briefcase', color: '#3B82F6' },
@@ -55,30 +57,8 @@ export default function IncomeScreen() {
         setShowDatePicker(true);
     };
 
-    const formatDate = (date: Date) => {
-        const today = new Date();
-        const isToday = date.getDate() === today.getDate() && 
-                        date.getMonth() === today.getMonth() && 
-                        date.getFullYear() === today.getFullYear();
-        
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        
-        if (isToday) {
-            return `Hôm nay, ${day} tháng ${month}`;
-        }
-        return `${day} tháng ${month}, ${year}`;
-    };
-
     const handleAmountChange = (text: string) => {
-        const cleanValue = text.replace(/[^0-9]/g, '');
-        if (!cleanValue) {
-            setAmount('');
-            return;
-        }
-        const formatted = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        setAmount(formatted);
+        setAmount(formatAmount(text));
     };
 
     return (
@@ -178,7 +158,7 @@ export default function IncomeScreen() {
                                     fontSize={16}
                                     paddingLeft={18}
                                 >
-                                    {formatDate(date)}
+                                    {formatVietnameseDate(date)}
                                 </Text>
                                 <Ionicons name="chevron-down" size={16} color={theme.color?.val} />
                             </XStack>

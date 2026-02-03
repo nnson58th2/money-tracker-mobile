@@ -4,7 +4,9 @@ import { Stack, router, Link } from 'expo-router';
 import { YStack, XStack, Text, Input, Button, Circle, useTheme, Image } from 'tamagui';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
+
+import { useAuth } from '@/context/AuthContext';
+import { getBiometricLabel, formatBadgeCount } from '@/utils/formatting';
 
 const MAX_FACE_ID_ATTEMPTS = 3;
 
@@ -40,8 +42,7 @@ export default function LoginScreen() {
     }, []);
 
     const promptEnableFaceId = (enteredPassword: string) => {
-        const biometricLabel = biometricType === 'face' ? 'Face ID' :
-                               biometricType === 'fingerprint' ? 'Touch ID' : 'Sinh trắc học';
+        const biometricLabel = getBiometricLabel(biometricType);
 
         Alert.alert(
             `Bật ${biometricLabel}`,
@@ -245,11 +246,6 @@ export default function LoginScreen() {
                                                 Quên mật khẩu?
                                             </Text>
                                         </Link>
-
-                                        {/* Debug info - remove after testing */}
-                                        <Text color="$tertiary" fontSize={10}>
-                                            Debug: Bio={isBiometricAvailable ? 'Y' : 'N'}, FaceID={isFaceIdEnabled ? 'Y' : 'N'}, Type={biometricType || 'none'}
-                                        </Text>
                                     </YStack>
                                 </YStack>
 
@@ -257,8 +253,8 @@ export default function LoginScreen() {
                                 <YStack marginBottom={8} gap={20}>
                                     {/* Quick Shortcuts */}
                                     <XStack justifyContent="space-around" paddingHorizontal={24}>
-                                        <QuickAction icon="qr-code-outline" label="QR nhận tiền" />
-                                        <QuickAction icon="notifications-outline" label="Thông báo" badge={notificationCount} />
+                                        <QuickAction icon="notifications-outline" label="Thông báo" badge={notificationCount} onPress={() => router.push('/notifications')} />
+                                        <QuickAction icon="qr-code-outline" label="QR nhận tiền" onPress={() => router.push('/qr-receive')} />
                                     </XStack>
 
                                     {/* Footer Nav Links */}
@@ -289,28 +285,27 @@ export default function LoginScreen() {
     );
 }
 
-function QuickAction({ icon, label, badge }: { icon: any, label: string, badge?: number }) {
+function QuickAction({ icon, label, badge, onPress }: { icon: any, label: string, badge?: number, onPress?: () => void }) {
     const theme = useTheme();
-
-    const badgeShow = badge ? (badge > 99 ? '99+' : badge) : '';
+    const badgeText = badge ? formatBadgeCount(badge) : '';
 
     return (
-        <YStack alignItems="center" gap={8} opacity={0.9} pressStyle={{ opacity: 0.6 }}>
+        <YStack alignItems="center" gap={8} opacity={0.9} pressStyle={{ opacity: 0.6 }} onPress={onPress}>
             <YStack>
                 <Circle size={56} backgroundColor="$colorBox" borderWidth={1} borderColor="$borderColor">
                     <Ionicons name={icon} size={24} color={theme.color?.val} />
                 </Circle>
-                {badge && (
-                    <Circle 
-                        position="absolute" 
-                        top={-4} 
-                        right={-4} 
+                {badge && badge > 0 && (
+                    <Circle
+                        position="absolute"
+                        top={-4}
+                        right={-4}
                         size={22}
                         backgroundColor="$red"
-                        justifyContent="center" 
+                        justifyContent="center"
                         alignItems="center"
                     >
-                        <Text color="white" fontSize={badge > 99 ? 8 : 10} fontWeight="bold">{badgeShow}</Text>
+                        <Text color="white" fontSize={badge > 99 ? 8 : 10} fontWeight="bold">{badgeText}</Text>
                     </Circle>
                 )}
             </YStack>

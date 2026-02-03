@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 
 import BlurCard from '@/components/BlurCard';
 import { useAuth } from '@/context/AuthContext';
+import { getBiometricLabel } from '@/utils/formatting';
 
 const menuItems = [
     { icon: 'person-outline', label: 'Thông tin cá nhân', value: '' },
@@ -28,9 +29,7 @@ export default function ProfileScreen() {
     const [isTogglingFaceId, setIsTogglingFaceId] = useState(false);
 
     const isVerifiedAccount = true;
-
-    const biometricLabel = biometricType === 'face' ? 'Face ID' :
-                           biometricType === 'fingerprint' ? 'Touch ID' : 'Sinh trắc học';
+    const biometricLabel = getBiometricLabel(biometricType);
 
     const handleToggleFaceId = async (enabled: boolean) => {
         if (isTogglingFaceId) return;
