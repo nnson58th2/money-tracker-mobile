@@ -104,3 +104,97 @@ export function formatBadgeCount(count: number): string {
     if (count > 9) return '9+';
     return count.toString();
 }
+
+// ============================================
+// REMEMBERED USER FORMATTING FUNCTIONS
+// ============================================
+
+/**
+ * Get display name with smart fallback chain
+ * @param displayName - User's display name (may be null)
+ * @param identifier - User's email or phone
+ * @param identifierType - 'email' or 'phone'
+ * @returns Display name using fallback: displayName → email prefix → 'Bạn'
+ */
+export function getDisplayNameWithFallback(
+    displayName: string | null | undefined,
+    identifier: string | null | undefined,
+    identifierType: 'email' | 'phone' | null | undefined
+): string {
+    // Try displayName first
+    if (displayName && displayName.trim()) {
+        return displayName.trim();
+    }
+
+    // For email, extract prefix before @
+    if (identifierType === 'email' && identifier) {
+        const emailPrefix = identifier.split('@')[0];
+        if (emailPrefix) {
+            return emailPrefix;
+        }
+    }
+
+    // Default fallback
+    return 'Bạn';
+}
+
+/**
+ * Mask email for display (e.g., "example@gmail.com" → "e***e@gmail.com")
+ * @param email - Email address to mask
+ * @returns Masked email string
+ */
+export function maskEmail(email: string): string {
+    if (!email || !email.includes('@')) return email;
+
+    const [localPart, domain] = email.split('@');
+
+    if (localPart.length <= 2) {
+        return `${localPart[0]}***@${domain}`;
+    }
+
+    const firstChar = localPart[0];
+    const lastChar = localPart[localPart.length - 1];
+    return `${firstChar}***${lastChar}@${domain}`;
+}
+
+/**
+ * Mask phone number for display (e.g., "0987654321" → "09***321")
+ * @param phone - Phone number to mask
+ * @returns Masked phone string
+ */
+export function maskPhone(phone: string): string {
+    if (!phone || phone.length < 6) return phone;
+
+    // Keep first 2 digits and last 3 digits
+    const firstPart = phone.slice(0, 2);
+    const lastPart = phone.slice(-3);
+    return `${firstPart}***${lastPart}`;
+}
+
+/**
+ * Mask identifier based on type
+ * @param identifier - Email or phone to mask
+ * @param identifierType - 'email' or 'phone'
+ * @returns Masked identifier string
+ */
+export function maskIdentifier(
+    identifier: string,
+    identifierType: 'email' | 'phone' | null | undefined
+): string {
+    if (!identifier) return '';
+
+    if (identifierType === 'email') {
+        return maskEmail(identifier);
+    }
+
+    if (identifierType === 'phone') {
+        return maskPhone(identifier);
+    }
+
+    // Auto-detect type
+    if (identifier.includes('@')) {
+        return maskEmail(identifier);
+    }
+
+    return maskPhone(identifier);
+}

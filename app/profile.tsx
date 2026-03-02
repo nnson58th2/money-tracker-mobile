@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Alert } from 'react-native';
-import { YStack, XStack, Text, Circle, ScrollView, useTheme, Separator, Image, Switch } from 'tamagui';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { router, Stack } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Circle, ScrollView, Separator, Switch, Text, useTheme, XStack, YStack } from 'tamagui';
 
 import BlurCard from '@/components/BlurCard';
 import { useAuth } from '@/context/AuthContext';
@@ -14,26 +16,42 @@ const menuItems = [
     { icon: 'notifications-outline', label: 'Thông báo', value: 'Bật' },
     { icon: 'card-outline', label: 'Quản lý thẻ', value: '2 thẻ' },
     { icon: 'shield-checkmark-outline', label: 'Bảo mật & Quyền riêng tư', value: '' },
-    { icon: 'help-circle-outline', label: 'Trợ giúp & Hỗ trợ', value: '' },
+    { icon: 'help-circle-outline', label: 'Trợ giúp & Hỗ trợ', value: '' }
 ];
 
 export default function ProfileScreen() {
     const theme = useTheme();
-    const {
-        isFaceIdEnabled,
-        isBiometricAvailable,
-        biometricType,
-        enableFaceId,
-        disableFaceId,
-    } = useAuth();
+    const { isFaceIdEnabled, isBiometricAvailable, biometricType, enableFaceId, disableFaceId, user, logout, clearRememberedUser } = useAuth();
     const [isTogglingFaceId, setIsTogglingFaceId] = useState(false);
 
-    const isVerifiedAccount = true;
+    const isVerifiedAccount = user?.emailVerified ?? false;
     const biometricLabel = getBiometricLabel(biometricType);
+    const displayName = user?.displayName || 'Người dùng';
+    const displayEmail = user?.email || 'Chưa có email';
+
+    // Handle switch account - clear remembered user and logout
+    const handleSwitchAccount = async () => {
+        Alert.alert('Đổi tài khoản', 'Bạn có muốn đăng xuất và đổi sang tài khoản khác?', [
+            { text: 'Hủy', style: 'cancel' },
+            {
+                text: 'Đổi tài khoản',
+                style: 'destructive',
+                onPress: async () => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    await clearRememberedUser();
+                    await logout();
+                    router.replace('/login');
+                }
+            }
+        ]);
+    };
 
     const handleToggleFaceId = async (enabled: boolean) => {
         if (isTogglingFaceId) return;
         setIsTogglingFaceId(true);
+
+        // Haptic feedback for toggle interaction
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         if (enabled) {
             // Need to prompt for password to enable Face ID
@@ -45,19 +63,17 @@ export default function ProfileScreen() {
                     {
                         text: 'Xác nhận',
                         onPress: async (password?: string) => {
-                            if (password === '123') {
+                            if (password) {
                                 const success = await enableFaceId(password);
                                 if (success) {
                                     Alert.alert('Thành công', `${biometricLabel} đã được bật!`);
                                 } else {
-                                    Alert.alert('Lỗi', `Không thể bật ${biometricLabel}.`);
+                                    Alert.alert('Lỗi', 'Mật khẩu không đúng hoặc không thể bật sinh trắc học.');
                                 }
-                            } else {
-                                Alert.alert('Lỗi', 'Mật khẩu không đúng.');
                             }
                             setIsTogglingFaceId(false);
-                        },
-                    },
+                        }
+                    }
                 ],
                 'secure-text'
             );
@@ -74,39 +90,35 @@ export default function ProfileScreen() {
             <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1 }}>
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <YStack alignItems="center" marginTop={20} marginBottom={32}>
-                        <Circle 
-                            size={80} 
-                            borderWidth={2} 
-                            borderColor="$borderColor" 
-                            backgroundColor="$borderColor"
-                            marginBottom={8}
-                        >
-                            <Circle
-                                size={76}
-                                overflow="hidden"
-                                justifyContent="flex-start"
-                                alignItems="center"
-                            >
+                        <Circle size={80} borderWidth={2} borderColor="$borderColor" backgroundColor="$borderColor" marginBottom={8}>
+                            <Circle size={76} overflow="hidden" justifyContent="flex-start" alignItems="center">
                                 <Image
-                                    source={require('@/assets/images/xoan-avatar.webp')} 
-                                    width="100%"
-                                    height="100%" 
-                                    objectFit="cover"
+                                    source={require('@/assets/images/xoan-avatar.webp')}
+                                    style={{ width: '100%', height: '100%' }}
+                                    contentFit="cover"
+                                    transition={200}
+                                    cachePolicy="memory-disk"
                                 />
                             </Circle>
                         </Circle>
-                        <Text color="$color" fontSize={24} fontWeight="700" marginBottom={4}>Nguyễn Như Sơn</Text>
-                        <Text color="$color" fontSize={16}>nhuson2306@gmail.com</Text>
-                        <XStack 
-                            backgroundColor="$primary" 
-                            paddingHorizontal={12} 
-                            paddingVertical={6} 
-                            borderRadius={100} 
+                        <Text color="$color" fontSize={24} fontWeight="700" marginBottom={4}>
+                            {displayName}
+                        </Text>
+                        <Text color="$color" fontSize={16}>
+                            {displayEmail}
+                        </Text>
+                        <XStack
+                            backgroundColor="$primary"
+                            paddingHorizontal={12}
+                            paddingVertical={6}
+                            borderRadius={100}
                             marginTop={12}
                             borderWidth={1}
                             borderColor="$borderColor"
                         >
-                            <Text color={isVerifiedAccount ? "$success" : "$red"} fontSize={12} fontWeight="600">● {isVerifiedAccount ? 'Đã xác thực' : 'Chưa xác thực'}</Text>
+                            <Text color={isVerifiedAccount ? '$success' : '$red'} fontSize={12} fontWeight="600">
+                                ● {isVerifiedAccount ? 'Đã xác thực' : 'Chưa xác thực'}
+                            </Text>
                         </XStack>
                     </YStack>
 
@@ -124,10 +136,16 @@ export default function ProfileScreen() {
                                             <Circle size={40} backgroundColor="$tertiary">
                                                 <Ionicons name={item.icon as any} size={20} color={theme.colorBox?.val} />
                                             </Circle>
-                                            <Text color="$color" fontSize={16} fontWeight="500">{item.label}</Text>
+                                            <Text color="$color" fontSize={16} fontWeight="500">
+                                                {item.label}
+                                            </Text>
                                         </XStack>
                                         <XStack alignItems="center" gap={8}>
-                                            {item.value ? <Text color="$color" fontSize={14}>{item.value}</Text> : null}
+                                            {item.value ? (
+                                                <Text color="$color" fontSize={14}>
+                                                    {item.value}
+                                                </Text>
+                                            ) : null}
                                             <Ionicons name="chevron-forward" size={20} color={theme.color?.val} />
                                         </XStack>
                                     </XStack>
@@ -137,18 +155,11 @@ export default function ProfileScreen() {
                         </BlurCard>
                     </YStack>
 
-                    {/* Face ID / Biometric Section */}
-                    {isBiometricAvailable && (
-                        <YStack paddingHorizontal={24} marginBottom={40}>
-                            <Text color="$tertiary" fontSize={14} fontWeight="600" marginBottom={12} marginLeft={4}>
-                                ĐĂNG NHẬP NHANH
-                            </Text>
-                            <BlurCard intensity={10} paddingHorizontal={0} paddingVertical={0}>
-                                <XStack
-                                    padding={20}
-                                    alignItems="center"
-                                    justifyContent="space-between"
-                                >
+                    <YStack paddingHorizontal={24} marginBottom={24} gap={12}>
+                        <BlurCard intensity={10} paddingHorizontal={0} paddingVertical={0}>
+                            {/* Biometric */}
+                            {isBiometricAvailable && (
+                                <XStack padding={20} alignItems="center" justifyContent="space-between">
                                     <XStack alignItems="center" gap={16}>
                                         <Circle size={40} backgroundColor="$tertiary">
                                             <MaterialCommunityIcons
@@ -157,14 +168,9 @@ export default function ProfileScreen() {
                                                 color={theme.colorBox?.val}
                                             />
                                         </Circle>
-                                        <YStack>
-                                            <Text color="$color" fontSize={16} fontWeight="500">
-                                                Đăng nhập bằng {biometricLabel}
-                                            </Text>
-                                            <Text color="$tertiary" fontSize={12}>
-                                                {isFaceIdEnabled ? 'Đã bật' : 'Chưa bật'}
-                                            </Text>
-                                        </YStack>
+                                        <Text color="$color" fontSize={16} fontWeight="500">
+                                            Đăng nhập nhanh
+                                        </Text>
                                     </XStack>
                                     <Switch
                                         size="$4"
@@ -176,9 +182,29 @@ export default function ProfileScreen() {
                                         <Switch.Thumb backgroundColor="$color" />
                                     </Switch>
                                 </XStack>
-                            </BlurCard>
-                        </YStack>
-                    )}
+                            )}
+                            <Separator borderColor="$borderColor" marginHorizontal={20} />
+
+                            {/* Switch Account */}
+                            <XStack
+                                padding={20}
+                                alignItems="center"
+                                justifyContent="space-between"
+                                pressStyle={{ backgroundColor: '$backgroundHover' }}
+                                onPress={handleSwitchAccount}
+                            >
+                                <XStack alignItems="center" gap={16}>
+                                    <Circle size={40} backgroundColor="$red">
+                                        <Ionicons name="swap-horizontal-outline" size={20} color={theme.colorBox?.val} />
+                                    </Circle>
+                                    <Text color="$color" fontSize={16} fontWeight="500">
+                                        Đổi tài khoản khác
+                                    </Text>
+                                </XStack>
+                                <Ionicons name="chevron-forward" size={20} color={theme.color?.val} />
+                            </XStack>
+                        </BlurCard>
+                    </YStack>
                 </ScrollView>
             </SafeAreaView>
         </YStack>

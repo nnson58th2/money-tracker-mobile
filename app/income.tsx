@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
-import { TextInput, Platform, Modal, TouchableWithoutFeedback } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { YStack, XStack, Text, Circle, ScrollView, useTheme, Button, Input } from 'tamagui';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Stack } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import { Modal, Platform, TextInput, TouchableWithoutFeedback } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button, Input, ScrollView, Text, useTheme, XStack, YStack } from 'tamagui';
 
+import CategoryItem, { Category } from '@/components/CategoryItem';
 import { formatAmount, formatVietnameseDate } from '@/utils/formatting';
 
-const categories = [
+const categories: Category[] = [
     { id: 'gift', name: 'Quà tặng', icon: 'gift', color: '#EC4899' },
     { id: 'freelance', name: 'Freelance', icon: 'briefcase', color: '#3B82F6' },
     { id: 'salary', name: 'Lương', icon: 'cash', color: '#10B981' },
@@ -26,9 +27,10 @@ export default function IncomeScreen() {
     const [tempDate, setTempDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const handleSelectedCategory = (categoryId: string) => {
+    // Stable callback for category selection to prevent child re-renders
+    const handleSelectedCategory = useCallback((categoryId: string) => {
         setSelectedCategory((prevCatId) => (prevCatId === categoryId ? null : categoryId));
-    };
+    }, []);
 
     const handleChangeDate = (event: any, selectedDate?: Date) => {
         if (Platform.OS === 'android') {
@@ -66,9 +68,9 @@ export default function IncomeScreen() {
             <Stack.Screen options={{ title: 'Thu nhập', headerBackTitle: 'Trang chủ', headerTintColor: theme.color?.val }} />
              <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
 
-                <ScrollView 
+                <ScrollView
                     ref={scrollViewRef}
-                    contentContainerStyle={{ paddingBottom: 60 }} 
+                    contentContainerStyle={{ paddingBottom: 60 }}
                     keyboardShouldPersistTaps="handled"
                     automaticallyAdjustKeyboardInsets
                 >
@@ -78,9 +80,9 @@ export default function IncomeScreen() {
                             <Text color="$color" fontSize={16} marginBottom={12}>Số tiền nhận được</Text>
                             <XStack alignItems="center">
                                 <TextInput
-                                    style={{ 
+                                    style={{
                                         fontSize: 52,
-                                        fontWeight: '700', 
+                                        fontWeight: '700',
                                         color: theme.color?.val,
                                         minWidth: 50,
                                         textAlign: 'right',
@@ -100,50 +102,24 @@ export default function IncomeScreen() {
                         <YStack marginBottom={32}>
                             <Text color="$color" fontSize={18} fontWeight="600" marginBottom={16}>Nguồn thu</Text>
                             <XStack flexWrap="wrap" gap={16} justifyContent="flex-start">
-                                {categories.map((cat) => {
-                                    const isSelected = selectedCategory === cat.id;
-                                    return (
-                                        <YStack 
-                                            key={cat.id} 
-                                            width="30%" 
-                                            alignItems="center" 
-                                            gap={8}
-                                            onPress={() => handleSelectedCategory(cat.id)}
-                                            pressStyle={{ opacity: 0.7 }}
-                                        >
-                                            <Circle 
-                                                size={64} 
-                                                backgroundColor={isSelected ? cat.color : '$tertiary'} 
-                                                borderWidth={isSelected ? 0 : 1}
-                                                borderColor="$borderColor"
-                                            >
-                                                <Ionicons 
-                                                    name={cat.icon as any} 
-                                                    size={28} 
-                                                    color={isSelected ? 'white' : cat.color} 
-                                                />
-                                            </Circle>
-                                            <Text 
-                                                color="$color"
-                                                fontSize={12} 
-                                                textAlign="center" 
-                                                fontWeight={isSelected ? '600' : '400'}
-                                            >
-                                                {cat.name}
-                                            </Text>
-                                        </YStack>
-                                    );
-                                })}
+                                {categories.map((cat) => (
+                                    <CategoryItem
+                                        key={cat.id}
+                                        category={cat}
+                                        isSelected={selectedCategory === cat.id}
+                                        onToggle={handleSelectedCategory}
+                                    />
+                                ))}
                             </XStack>
                         </YStack>
 
                         {/* Additional Details */}
                         <YStack gap={16}>
-                            <XStack 
-                                backgroundColor="$primary" 
-                                height={56} 
-                                borderRadius={16} 
-                                alignItems="center" 
+                            <XStack
+                                backgroundColor="$primary"
+                                height={56}
+                                borderRadius={16}
+                                alignItems="center"
                                 paddingHorizontal={16}
                                 borderWidth={1}
                                 borderColor="$borderColor"
@@ -206,21 +182,21 @@ export default function IncomeScreen() {
                             )}
 
                             {/* Note */}
-                            <XStack 
-                                backgroundColor="$primary" 
-                                height={56} 
-                                borderRadius={16} 
-                                alignItems="center" 
+                            <XStack
+                                backgroundColor="$primary"
+                                height={56}
+                                borderRadius={16}
+                                alignItems="center"
                                 paddingHorizontal={16}
                                 borderWidth={1}
                                 borderColor="$borderColor"
                             >
                                 <Ionicons name="create-outline" size={20} color={theme.color?.val} />
-                                <Input 
-                                    flex={1} 
-                                    backgroundColor="transparent" 
-                                    borderWidth={0} 
-                                    placeholder="Thêm ghi chú..." 
+                                <Input
+                                    flex={1}
+                                    backgroundColor="transparent"
+                                    borderWidth={0}
+                                    placeholder="Thêm ghi chú..."
                                     placeholderTextColor={theme.color?.val}
                                     color="$color"
                                     fontSize={16}
@@ -235,9 +211,9 @@ export default function IncomeScreen() {
 
                 {/* Footer Button */}
                 <YStack paddingHorizontal={24}>
-                    <Button 
-                        backgroundColor="$tertiary" 
-                        height={56} 
+                    <Button
+                        backgroundColor="$tertiary"
+                        height={56}
                         pressStyle={{ opacity: 0.85 }}
                         borderRadius={16}
                         borderWidth={0}

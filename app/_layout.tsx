@@ -19,6 +19,7 @@ export default function RootLayout() {
                     <Stack screenOptions={{ headerStyle: { backgroundColor: '#2D281F' } }}>
                         <Stack.Screen name="login" options={{ headerShown: false, animation: 'fade' }} />
                         <Stack.Screen name="register" options={{ headerShown: false }} />
+                        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
                         <Stack.Screen name="qr-receive" options={{ presentation: 'modal' }} />

@@ -15,26 +15,28 @@ type TabsScreenListType = {
 
 const TabsScreenList: TabsScreenListType[] = [
     { icon: IconOcticons, name: 'index', title: 'Trang chủ', iconName: 'house.fill' },
-    { icon: IconSymbol, name: 'explore', title: 'Thống kê', iconName: 'chart.bar.fill' },
+    { icon: IconSymbol, name: 'explore', title: 'Thống kê', iconName: 'chart.bar.fill' }
 ];
 
 export default function TabLayout() {
     const theme = useTheme();
 
-  return (
-    <Tabs
-        screenOptions={{
-            tabBarActiveTintColor: theme.color?.val,
-            tabBarInactiveTintColor: theme.tertiaryHover?.val,
-            headerShown: false,
-            tabBarButton: HapticTab,
-            tabBarStyle: {
-                borderColor: theme.borderColor?.val,
-                borderTopWidth: 1,
-                backgroundColor: '#2D2620',
-                height: 70,
-            },
-        }}>
+    return (
+        <Tabs
+            screenOptions={{
+                tabBarActiveTintColor: theme.color?.val,
+                tabBarInactiveTintColor: theme.tertiaryHover?.val,
+                headerShown: false,
+                tabBarButton: HapticTab,
+                tabBarStyle: {
+                    borderColor: theme.borderColor?.val,
+                    borderTopWidth: 1,
+                    backgroundColor: '#2D2620',
+                    paddingTop: 8,
+                    height: 85
+                }
+            }}
+        >
             {TabsScreenList.map((screen) => (
                 <Tabs.Screen
                     key={screen.name}
@@ -44,7 +46,7 @@ export default function TabLayout() {
                         tabBarIcon: ({ color }) => {
                             const Icon = screen.icon;
                             return <Icon size={28} name={screen.iconName} color={color} />;
-                        },
+                        }
                     }}
                 />
             ))}

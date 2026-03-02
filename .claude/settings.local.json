@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(vercel-react-native-skills)",
+      "Bash(npx tsc:*)",
+      "Bash(open:*)",
+      "Bash(npx expo prebuild:*)",
+      "Bash(pod install)"
+    ]
+  }
+}
