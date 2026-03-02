@@ -55,14 +55,6 @@
             "reactCompiler": true
         },
         "extra": {
-            "firebase": {
-                "apiKey": "AIzaSyDZPaVYVaDHYjB-Tjhq_hukULAs_aD64kY",
-                "authDomain": "ss-money-tracker-mobile.firebaseapp.com",
-                "projectId": "ss-money-tracker-mobile",
-                "storageBucket": "ss-money-tracker-mobile.firebasestorage.app",
-                "messagingSenderId": "675366675649",
-                "appId": "1:675366675649:web:ecf54e350b7938bcb9a040"
-            },
             "router": {},
             "eas": {
                 "projectId": "8bd9f591-b342-417b-8218-eaf098eb3e94"
